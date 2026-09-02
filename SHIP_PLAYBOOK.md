@@ -1,19 +1,15 @@
-# Ship playbook — keep tracks separate
+# Ship playbook
 
-Topic changes every week. OCD and BPD are examples only.
+Keep tracks in separate chats.
 
-## Track A — preceptee quizzes
-URL pattern: `https://www.yuriybortnik.com/{topic}quiz`
+## Preceptee quizzes
+Live URL going forward: `https://www.yuriybortnik.com/{topic}quiz`
 Example: `https://www.yuriybortnik.com/bpdquiz`
-Wix page on the practice site. Do not invent a new quiz subdomain unless he asks.
-Existing live exception: `https://ocdquiz.yuriybortnik.com` stays as-is. Do not migrate it in passing.
-Clone the ocdquiz *shell* only. New GitHub repo every week. Do not reuse `preceptee-ocd-quiz` or `preceptee-bpd-quiz`.
 
-## Track B — clinic patient screeners
-URL pattern: `{short}scr1.yuriybortnik.com`
-Example: `https://ocdscr1.yuriybortnik.com`
-Wix DNS CNAME `{short}scr1` → `bortniky-dotcom.github.io`
-Do not bind that CNAME to the Wix practice site.
-Clone `childhood-adhd-screener`. New public repo per instrument.
+Exception to fix: `https://ocdquiz.yuriybortnik.com` should also exist as `https://www.yuriybortnik.com/ocdquiz`. Do not delete the exam. Old subdomain may redirect to the www path.
 
-Never put quiz rules in a screener chat or screener rules in a quiz chat.
+## Patient screeners
+Live URL going forward: `https://{short}.yuriybortnik.com` or `https://{short}scr1.yuriybortnik.com`
+FW-OCS live host: `https://fw-ocs.yuriybortnik.com`
+Wix DNS CNAME host → `bortniky-dotcom.github.io`. Do not assign that hostname to the Wix site.
+Leave `www.yuriybortnik.com/fw-ocs` and `/adhdchildcustom` until he asks to redirect them.
