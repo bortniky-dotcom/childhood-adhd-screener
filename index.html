@@ -4,8 +4,99 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ADHD-CA</title>
+  <meta name="description" content="ADHD childhood retrospective. Initials only. Results go to the ReadyWell office." />
+  <meta property="og:title" content="ADHD-CA" />
+  <meta property="og:description" content="ADHD Childhood Retrospective Assessment" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://www.yuriybortnik.com/og.jpg" id="ogImage" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://www.yuriybortnik.com/og.jpg" id="twImage" />
+  <meta property="x:game:image" content="https://www.yuriybortnik.com/x-banner.jpg" id="xBanner" />
+  <script>
+    (function () {
+      var host = location.host;
+      if (!host || host === "localhost" || host.indexOf("127.0.0.1") === 0) return;
+      var origin = location.protocol + "//" + host;
+      var og = origin + "/og.jpg";
+      var banner = origin + "/x-banner.jpg";
+      var ogEl = document.getElementById("ogImage");
+      var twEl = document.getElementById("twImage");
+      var xbEl = document.getElementById("xBanner");
+      if (ogEl) ogEl.setAttribute("content", og);
+      if (twEl) twEl.setAttribute("content", og);
+      if (xbEl) xbEl.setAttribute("content", banner);
+    })();
+  </script>
+  <link rel="stylesheet" href="form.css" />
 </head>
 <body>
-  <p>Loading local source. See repo artifacts.</p>
+  <header>
+    <div class="brand">
+      <img src="yb-crest.svg" width="44" height="50" alt="YB crest" />
+      <div>
+        <div class="clinic">ReadyWell · Yuriy Bortnik, PMHNP</div>
+        <h1>ADHD-CA</h1>
+        <p class="sub">Childhood retrospective · ages 5 to 17 · not a diagnosis</p>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="card note">
+      Think back to childhood and adolescence. Rate how often each statement was true of you <strong>then</strong>, not now.
+    </div>
+    <form id="ocs" autocomplete="on">
+      <div class="card">
+        <h2>About you</h2>
+        <p class="hint">Initials required. Example: Y.B.</p>
+        <div class="grid-2">
+          <div>
+            <label class="field" for="name">Initials</label>
+            <input id="name" name="name" type="text" maxlength="12" placeholder="e.g. Y.B." required />
+          </div>
+          <div>
+            <label class="field" for="date">Today’s date</label>
+            <input id="date" name="date" type="date" />
+          </div>
+          <div>
+            <label class="field" for="age">Age (optional)</label>
+            <input id="age" name="age" type="number" min="5" max="120" />
+          </div>
+          <div>
+            <label class="field" for="visit">Next visit date</label>
+            <input id="visit" name="visit" type="date" />
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Childhood items</h2>
+        <p class="hint">1 = never or rarely. 2 = occasionally. 3 = sometimes. 4 = often. 5 = very often.</p>
+        <div id="partA"></div>
+      </div>
+      <div class="actions sticky">
+        <button type="button" id="scoreBtn">Score my answers</button>
+        <button type="button" id="gmailBtn">Open Gmail draft</button>
+        <button type="button" class="secondary" id="copyBtn">Copy summary</button>
+        <button type="button" class="secondary" id="printBtn">Print / save as PDF</button>
+      </div>
+      <p class="hint">Opens a Gmail draft in this browser to office@readywellpsych.com.</p>
+    </form>
+    <div class="card" id="results">
+      <h2>Your results</h2>
+      <div id="resultBody"></div>
+      <label class="field" for="summaryBox">Summary — copy this if Gmail does not open</label>
+      <textarea id="summaryBox" readonly></textarea>
+      <p id="copyStatus"></p>
+      <p class="hint" style="margin-top:.4rem">
+        Retrospective self-report supports clinical conversation and is not a diagnostic instrument.
+        Childhood onset should be corroborated where possible.
+      </p>
+    </div>
+  </main>
+  <footer>
+    ADHD-CA · ReadyWell office intake · not an official or validated screening instrument
+  </footer>
+  <script src="form.js"></script>
 </body>
 </html>
