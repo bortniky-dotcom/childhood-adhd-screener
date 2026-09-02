@@ -1,2 +1,1 @@
-# childhood-adhd-screener
-Adult self-report ADHD childhood retrospective assessment. Clinic screener.
+ADHD childhood retrospective self-report for clinic. Custom domain adhdchild.yuriybortnik.com.
