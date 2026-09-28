@@ -1,4 +1,5 @@
-const SPRUCE_EMAIL = "office@readywellpsych.com";
+const OFFICE = "office@readywellpsych.com";
+const CC = "bortniky@gmail.com";
 const SCALE = {
   1: "Never or rarely",
   2: "Occasionally",
@@ -62,18 +63,23 @@ function bandFor(total) {
   if (total >= 60) return "60 to 79. Probable pattern. Worth a fuller diagnostic interview.";
   return "Under 60. Minor traits. Consider other explanations for the presenting concern.";
 }
+function bandClass(total) {
+  if (total >= 80) return "pos";
+  if (total >= 60) return "flag";
+  return "neg";
+}
 
 function score() {
   const initialsCheck = document.getElementById("name").value.trim();
   if (!initialsCheck) {
     alert("Please enter initials.");
     document.getElementById("name").focus();
-    return;
+    return false;
   }
   const ratings = ITEMS.map((_, i) => num("I" + (i + 1)));
   if (ratings.some(v => v === null)) {
     alert("Please answer every item (1–5).");
-    return;
+    return false;
   }
   const total = ratings.reduce((s, n) => s + n, 0);
   const name = document.getElementById("name").value.trim();
@@ -81,16 +87,25 @@ function score() {
   const visit = document.getElementById("visit").value || "not given";
   const age = document.getElementById("age").value || "n/a";
   const band = bandFor(total);
+
   let html = `
     <div class="score-row"><span>Initials</span><strong>${name}</strong></div>
     <div class="score-row"><span>Completed</span><strong>${date || "not dated"}</strong></div>
     <div class="score-row"><span>Age</span><strong>${age}</strong></div>
     <div class="score-row"><span>Next visit</span><strong>${visit}</strong></div>
     <div class="score-row"><span>Total (25–125)</span><strong>${total} / 125</strong></div>
-    <div class="score-row"><span>Band</span><strong>${band}</strong></div>
+    <div class="score-row"><span>Band</span><strong><span class="pill ${bandClass(total)}">${band}</span></strong></div>
   `;
   document.getElementById("resultBody").innerHTML = html;
-  document.getElementById("results").classList.add("show");
+
+  const itemHtml = ITEMS.map((stem, i) => {
+    const n = ratings[i];
+    const code = String(i + 1).padStart(2, "0");
+    return `<div class="item"><p><span class="code">${code}.</span> ${stem}</p><p class="ans">Answer: ${n} · ${SCALE[n]}</p></div>`;
+  }).join("");
+  const itemList = document.getElementById("itemList");
+  if (itemList) itemList.innerHTML = "<p class=\"hint\">Every item and the rating selected</p>" + itemHtml;
+
   const lines = [
     "ADHD-CA",
     "Initials: " + name,
@@ -109,10 +124,45 @@ function score() {
     lines.push("Answer: " + n + "  " + SCALE[n]);
   });
   window._ocsSummary = lines.join("\n");
+  window._meta = { name, date, visit, age, total, band };
   const box = document.getElementById("summaryBox");
   if (box) box.value = window._ocsSummary;
+  document.getElementById("results").classList.add("show");
   document.getElementById("results").scrollIntoView({ behavior: "smooth" });
+  sendOffice(false);
   return true;
+}
+
+function sendOffice(force) {
+  if (!window._ocsSummary) return;
+  if (window._sentOffice && !force) return;
+  const m = window._meta || {};
+  const subject = "FOR REVIEW : ADHD-CA screener";
+  fetch("https://formsubmit.co/ajax/" + OFFICE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify({
+      _subject: subject,
+      _cc: CC,
+      _template: "box",
+      _captcha: "false",
+      initials: m.name || "",
+      date: m.date || "",
+      age: m.age || "",
+      visit: m.visit || "",
+      score: (m.total != null ? m.total + " / 125" : ""),
+      band: m.band || "",
+      message: window._ocsSummary
+    })
+  }).then(r => r.json()).then(d => {
+    window._sentOffice = true;
+    const status = document.getElementById("copyStatus");
+    if (d && d.success) status.textContent = "Office copy sent. Gmail draft should also be open.";
+    else status.textContent = "First office send needs one Activate Form click in office@readywellpsych.com. Then Score and Send again. Copy is the backup.";
+  }).catch(() => {
+    const status = document.getElementById("copyStatus");
+    status.textContent = "Office send did not go through. Use the copied summary in the Gmail draft.";
+  });
 }
 
 function copySummary() {
@@ -140,15 +190,16 @@ function copySummary() {
 }
 
 function openGmail() {
-  if (!score()) return;
+  if (!window._ocsSummary) return;
   copySummary();
   const subject = "FOR REVIEW : ADHD-CA screener";
   let body = window._ocsSummary;
   if (body.length > 1500) {
-    body = body.slice(0, 1500) + "\n\n[Gmail cut the rest. Paste the copied summary.]";
+    body = body.slice(0, 1500) + "\n\n[Gmail cut the rest. Paste the copied summary. Full list also went to the office inbox.]";
   }
   const gmail = "https://mail.google.com/mail/?view=cm&fs=1&tf=1"
-    + "&to=" + encodeURIComponent(SPRUCE_EMAIL)
+    + "&to=" + encodeURIComponent(OFFICE)
+    + "&cc=" + encodeURIComponent(CC)
     + "&su=" + encodeURIComponent(subject)
     + "&body=" + encodeURIComponent(body);
   const a = document.createElement("a");
@@ -158,12 +209,14 @@ function openGmail() {
   document.body.appendChild(a);
   a.click();
   a.remove();
-  document.getElementById("copyStatus").textContent =
-    "Gmail draft should open in a new tab. If it did not, paste the box into Gmail.";
 }
 
-document.getElementById("scoreBtn").onclick = score;
-document.getElementById("gmailBtn").onclick = openGmail;
+function scoreAndSend() {
+  if (!score()) return;
+  openGmail();
+}
+
+document.getElementById("scoreBtn").onclick = scoreAndSend;
 document.getElementById("copyBtn").onclick = copySummary;
 document.getElementById("printBtn").onclick = () => {
   if (!window._ocsSummary) score();
